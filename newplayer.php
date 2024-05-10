@@ -3,7 +3,26 @@ include 'conexion.php';
 session_start();
 
 if (isset($_SESSION["username"]) && isset($_SESSION["idreserva"])) {
+
     if (isset($_POST["username"])) {
+
+        if (isset($_SESSION['fecha']) && isset($_SESSION["opcion"])) {
+            $fecha = $_SESSION["fecha"];
+            $idtime = $_SESSION["opcion"];
+            $idpista = $_SESSION["idpista"];
+
+            $sql_reserva = "insert into reservation (idtimetable,idcourt,playdate) values (?,?,?)";
+            $result = $conn->prepare($sql_reserva);
+            $result->bindParam(1, $idtime);
+            $result->bindParam(2, $idpista);
+            $result->bindParam(3, $fecha);
+            $result->execute();
+            if ($result->rowCount() == 1) {
+                $idreserva = $conn->lastInsertId();
+                $_SESSION["idreserva"] = $idreserva;
+            }
+        }
+
         $iduser = $_SESSION["iduser"];
         $idreserva = $_SESSION["idreserva"];
         $username = $_POST["username"];
@@ -32,6 +51,7 @@ if (isset($_SESSION["username"]) && isset($_SESSION["idreserva"])) {
             $i = 2;
             do {
                 $jugador = "username" . $i;
+
                 if (isset($_POST[$jugador])) {
                     if ($_POST[$jugador] != "") {
                         $nombre = $_POST[$jugador];
@@ -48,7 +68,7 @@ if (isset($_SESSION["username"]) && isset($_SESSION["idreserva"])) {
         }
 
         if ($result->rowCount() == 1) {
-            header('Location: players');
+            header('Location: confirmacion_reserva');
             exit; // Terminar el script después de redirigir
         }
     } else {
